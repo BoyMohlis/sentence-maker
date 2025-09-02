@@ -2,8 +2,8 @@
 <html lang="id">
 <head>
   <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Game Susun Kalimat - Versi Final</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Game Susun Kalimat - Mobile Friendly</title>
   <style>
     body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
     #wordBank, #dropZone {
@@ -12,7 +12,8 @@
     }
     .word {
       background: #87ceeb; margin: 5px; padding: 10px;
-      border-radius: 8px; cursor: grab; user-select: none;
+      border-radius: 8px; cursor: pointer; user-select: none;
+      transition: transform 0.2s;
     }
     .word.dragging { opacity: 0.5; }
     #score { font-size: 24px; margin: 20px; }
@@ -80,11 +81,6 @@
   const message = document.getElementById('message');
   const scoreDisplay = document.getElementById('score');
 
-  /*
-  function shuffle(array) {
-    return array.sort(() => Math.random() - 0.5);
-  }
-*/
   function shuffle(array) {
    for (let i = array.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
@@ -112,6 +108,7 @@
       wordElem.innerText = word;
       wordElem.draggable = true;
 
+      // --- Drag (untuk laptop/PC)
       wordElem.addEventListener('dragstart', () => {
         wordElem.classList.add('dragging');
         speak(word, current.lang);
@@ -120,20 +117,28 @@
         wordElem.classList.remove('dragging');
       });
 
+      // --- Tap (untuk HP)
       wordElem.addEventListener('click', () => {
         speak(word, current.lang);
+        if (wordElem.parentElement.id === "wordBank") {
+          dropZone.appendChild(wordElem);
+        } else if (wordElem.parentElement.id === "dropZone") {
+          wordBank.appendChild(wordElem);
+        }
       });
 
       wordBank.appendChild(wordElem);
     });
   }
 
+  // Drag ke dropZone
   dropZone.addEventListener('dragover', (e) => {
     e.preventDefault();
     const dragging = document.querySelector('.dragging');
     if (dragging) dropZone.appendChild(dragging);
   });
 
+  // Drag balik ke wordBank
   wordBank.addEventListener('dragover', (e) => {
     e.preventDefault();
     const dragging = document.querySelector('.dragging');
@@ -204,5 +209,4 @@
     }
   </script>
 </body>
-
 </html>
