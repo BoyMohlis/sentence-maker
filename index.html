@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Game Susun Kalimat - Versi Final</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; margin-top: 50px; }
+    #wordBank, #dropZone {
+      margin: 20px; padding: 10px; border: 2px dashed #ccc;
+      min-height: 50px; display: flex; justify-content: center; flex-wrap: wrap;
+    }
+    .word {
+      background: #87ceeb; margin: 5px; padding: 10px;
+      border-radius: 8px; cursor: grab; user-select: none;
+    }
+    .word.dragging { opacity: 0.5; }
+    #score { font-size: 24px; margin: 20px; }
+    #message { font-size: 20px; margin: 10px; }
+    button { padding: 10px 20px; font-size: 18px; margin: 5px; }
+    
+    .wrapper { display: flex; transition: transform 0.3s ease; }
+    .sidebar { width: 250px; height: 100vh; background-color: #333; color: white; padding: 1em; position: fixed; top: 0; left: -280px; z-index: 1000; transition: left 0.3s ease; text-align: left; }
+    .sidebar.open { left: 0; }
+    .sidebar h2 { color: #fff; }
+    .sidebar a { display: block; color: #ccc; padding: 10px 0; text-decoration: none; }
+    .sidebar a:hover { color: #fff; }
+    .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0, 0, 0, 0.3); z-index: 999; display: none; }
+    .overlay.active { display: block; }
+    .menu-btn { position: fixed; top: 1rem; left: 1rem; font-size: 24px; cursor: pointer; z-index: 1100; background: #fff; padding: 5px 10px; border-radius: 5px; }
+  </style>
+</head>
+<body>
+
+  <div class="menu-btn" onclick="toggleSidebar()">☰</div>
+
+  <div class="sidebar" id="sidebar">
+    <br><h2>Menu</h2>
+    <a href="index.html">Beranda</a>
+    <a href="https://ra-adirasa.blogspot.com/">R.A. Adirasa</a>
+    <a href="help.html">Cara Pakai</a>
+    <a href="about.html">Tentang Aplikasi</a>
+  </div>
+
+  <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+
+<h1>Game Menyusun Kalimat <br> <font style="color: orangered;">(10 Example Sentences with “-ie” Words)</font> </h1>
+<div id="score">Skor: 0</div>
+
+<div id="wordBank"></div>
+<div id="dropZone"></div>
+
+<button id="checkButton">Cek Jawaban</button>
+<button id="restartButton" style="display:none;">Main Lagi</button>
+
+<div id="message"></div>
+
+<script>
+  const allSentences = [
+    { text: "My bestie and I went to the mall yesterday", lang: "en-US" },
+    { text: "She sent me a sweetie message this morning", lang: "en-US" },
+    { text: "That puppy is such a cutie!", lang: "en-US" },
+    { text: "The newbie needs help to understand the project", lang: "en-US" },
+    { text: "He took a selfie in front of the Eiffel Tower", lang: "en-US" },
+    { text: "I bought a new hoodie because the weather is cold", lang: "en-US" },
+    { text: "My hubby always makes me laugh", lang: "en-US" },
+    { text: "She packed some cookies for the school trip", lang: "en-US" },
+    { text: "Our oldie songs bring back so many memories", lang: "en-US" },
+    { text: "The groupie waited outside the concert hall all night", lang: "en-US" }
+  ];
+
+  let shuffledSentences = [];
+  let currentSentenceIndex = 0;
+  let score = 0;
+
+  const wordBank = document.getElementById('wordBank');
+  const dropZone = document.getElementById('dropZone');
+  const checkButton = document.getElementById('checkButton');
+  const restartButton = document.getElementById('restartButton');
+  const message = document.getElementById('message');
+  const scoreDisplay = document.getElementById('score');
+
+  /*
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+*/
+  function shuffle(array) {
+   for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+   }
+   return array;
+  }
+
+  function speak(text, lang) {
+    const utterance = new SpeechSynthesisUtterance(text);
+    utterance.lang = lang;
+    speechSynthesis.speak(utterance);
+  }
+
+  function startNewSentence() {
+    dropZone.innerHTML = '';
+    wordBank.innerHTML = '';
+    const current = shuffledSentences[currentSentenceIndex];
+    const sentenceWords = current.text.split(' ');
+    const shuffledWords = shuffle([...sentenceWords]);
+
+    shuffledWords.forEach(word => {
+      const wordElem = document.createElement('div');
+      wordElem.classList.add('word');
+      wordElem.innerText = word;
+      wordElem.draggable = true;
+
+      wordElem.addEventListener('dragstart', () => {
+        wordElem.classList.add('dragging');
+        speak(word, current.lang);
+      });
+      wordElem.addEventListener('dragend', () => {
+        wordElem.classList.remove('dragging');
+      });
+
+      wordElem.addEventListener('click', () => {
+        speak(word, current.lang);
+      });
+
+      wordBank.appendChild(wordElem);
+    });
+  }
+
+  dropZone.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    if (dragging) dropZone.appendChild(dragging);
+  });
+
+  wordBank.addEventListener('dragover', (e) => {
+    e.preventDefault();
+    const dragging = document.querySelector('.dragging');
+    if (dragging) wordBank.appendChild(dragging);
+  });
+
+  checkButton.addEventListener('click', () => {
+    const arranged = Array.from(dropZone.children).map(w => w.innerText);
+    const current = shuffledSentences[currentSentenceIndex];
+    const original = current.text.split(' ');
+
+    if (dropZone.children.length !== original.length) {
+      message.innerText = "Susun semua kata dulu!";
+      message.style.color = "orange";
+      return;
+    }
+
+    if (arranged.join(' ') === current.text) {
+      message.innerText = "Benar! 🎉";
+      message.style.color = "green";
+      score += 10;
+      speak(current.text, current.lang);
+    } else {
+      message.innerHTML = `Salah! ❌<br>Kalimat yang benar: <strong>${current.text}</strong>`;
+      message.style.color = "red";
+      score -= 5;
+    }
+
+    scoreDisplay.innerText = 'Skor: ' + score;
+
+    setTimeout(() => {
+      currentSentenceIndex++;
+      if (currentSentenceIndex >= shuffledSentences.length) {
+        message.innerText = "🎉 Semua soal selesai! Game Selesai.";
+        checkButton.disabled = true;
+        restartButton.style.display = 'inline-block';
+        wordBank.innerHTML = '';
+        dropZone.innerHTML = '';
+      } else {
+        startNewSentence();
+        message.innerText = '';
+      }
+    }, 1500);
+  });
+
+  restartButton.addEventListener('click', () => {
+    score = 0;
+    currentSentenceIndex = 0;
+    shuffledSentences = shuffle([...allSentences]);
+    scoreDisplay.innerText = 'Skor: 0';
+    checkButton.disabled = false;
+    restartButton.style.display = 'none';
+    message.innerText = '';
+    startNewSentence();
+  });
+
+  // Mulai game
+  shuffledSentences = shuffle([...allSentences]);
+  startNewSentence();
+</script>
+
+  <script>
+    function toggleSidebar() {
+      const sidebar = document.getElementById("sidebar");
+      const overlay = document.getElementById("overlay");
+      sidebar.classList.toggle("open");
+      overlay.classList.toggle("active");
+    }
+  </script>
+</body>
+</html>
