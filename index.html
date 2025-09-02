@@ -58,18 +58,18 @@
 <div id="message"></div>
 
 <script>
-  const allSentences = [
-    { text: "My bestie and I went to the mall yesterday", lang: "en-US" },
-    { text: "She sent me a sweetie message this morning", lang: "en-US" },
-    { text: "That puppy is such a cutie!", lang: "en-US" },
-    { text: "The newbie needs help to understand the project", lang: "en-US" },
-    { text: "He took a selfie in front of the Eiffel Tower", lang: "en-US" },
-    { text: "I bought a new hoodie because the weather is cold", lang: "en-US" },
-    { text: "My hubby always makes me laugh", lang: "en-US" },
-    { text: "She packed some cookies for the school trip", lang: "en-US" },
-    { text: "Our oldie songs bring back so many memories", lang: "en-US" },
-    { text: "The groupie waited outside the concert hall all night", lang: "en-US" }
-  ];
+const allSentences = [
+  { text: "My bestie and I went to the mall yesterday", lang: "en-US", meaning: "Sahabatku dan aku pergi ke mall kemarin" },
+  { text: "She sent me a sweetie message this morning", lang: "en-US", meaning: "Dia mengirimiku pesan manis pagi ini" },
+  { text: "That puppy is such a cutie!", lang: "en-US", meaning: "Anak anjing itu sangat imut!" },
+  { text: "The newbie needs help to understand the project", lang: "en-US", meaning: "Pemula itu butuh bantuan untuk memahami proyek" },
+  { text: "He took a selfie in front of the Eiffel Tower", lang: "en-US", meaning: "Dia berfoto selfie di depan Menara Eiffel" },
+  { text: "I bought a new hoodie because the weather is cold", lang: "en-US", meaning: "Aku membeli hoodie baru karena cuacanya dingin" },
+  { text: "My hubby always makes me laugh", lang: "en-US", meaning: "Suamiku selalu membuatku tertawa" },
+  { text: "She packed some cookies for the school trip", lang: "en-US", meaning: "Dia membawa beberapa kue untuk perjalanan sekolah" },
+  { text: "Our oldie songs bring back so many memories", lang: "en-US", meaning: "Lagu-lagu lama kami mengingatkan banyak kenangan" },
+  { text: "The groupie waited outside the concert hall all night", lang: "en-US", meaning: "Penggemar itu menunggu di luar gedung konser semalaman" }
+];
 
   let shuffledSentences = [];
   let currentSentenceIndex = 0;
@@ -156,7 +156,7 @@
       message.style.color = "orange";
       return;
     }
-
+/*
     if (arranged.join(' ') === current.text) {
       message.innerText = "Benar! 🎉";
       message.style.color = "green";
@@ -167,8 +167,20 @@
       message.style.color = "red";
       score -= 5;
     }
+*/
+if (arranged.join(' ') === current.text) {
+  message.innerHTML = `✅ Benar! 🎉<br><strong style="color: blue;">${current.text}</strong><br>Artinya: <em style="color: silver;">${current.meaning}</em>`;
+  message.style.color = "green";
+  score += 10;
+  speak(current.text, current.lang);
+} else {
+  message.innerHTML = `❌ Salah!<br>Kalimat yang benar: <strong style="color: blue;">${current.text}</strong><br>Artinya: <em style="color: silver;">${current.meaning}</em>`;
+  message.style.color = "red";
+  score -= 5;
+  speak(current.text, current.lang);
+}
 
-    scoreDisplay.innerText = 'Skor: ' + score;
+scoreDisplay.innerText = 'Skor: ' + score;
 
     setTimeout(() => {
       currentSentenceIndex++;
@@ -182,7 +194,7 @@
         startNewSentence();
         message.innerText = '';
       }
-    }, 4000);
+    }, 5000);
   });
 
   restartButton.addEventListener('click', () => {
@@ -211,5 +223,3 @@
   </script>
 </body>
 </html>
-
-
